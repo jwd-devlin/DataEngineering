@@ -13,11 +13,13 @@ class UdacityPlugin(AirflowPlugin):
         operators.CreateTablesOperator,
         operators.USCityCoordinatesOperator,
         operators.USDemographicsOperator,
-        operators.USAirportsOperator
+        operators.USAirportsOperator,
+        operators.USImmigrationOperator
     ]
     helpers = [
         helpers.SqlQueries,
         helpers.DataStorage,
-        helpers.DataLocations
+        helpers.DataLocations,
+        helpers.ImmigrationConvert
     ]
 
