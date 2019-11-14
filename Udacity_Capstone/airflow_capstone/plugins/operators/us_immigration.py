@@ -58,6 +58,7 @@ class USImmigrationOperator(BaseOperator):
         data_frame = data_frame[data_frame["i94mode"] == 1.0]
 
         data_frame.reset_index(inplace = True)
+        data_frame = data_frame.replace({pd.np.nan: 0.0})
         return data_frame
 
     def execute(self, context):
@@ -78,6 +79,6 @@ class USImmigrationOperator(BaseOperator):
                 batch_size = 5
                 columns = ["i94port", "biryear", "i94cit", "depdate", "i94visa", "i94mon", "i94yr",
                            "port_names"]
-
-                self.data_storage.upload_data_redshift(redshift, df_clean, batch_size, self.table_name, columns,
+                table_name_plus = self.table_name +"("+",".join(columns)+")"
+                self.data_storage.upload_data_redshift(redshift, df_clean, batch_size, table_name_plus, columns,
                                                        values_insert)

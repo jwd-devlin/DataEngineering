@@ -1018,6 +1018,8 @@ class ImmigrationConvert:
 
          drop_list = ["Collapsed", "Overseas", "No PORT Code"]
          df_invalid_ports = df_port_all_map[~df_port_all_map['port_names'].str.contains("|".join(drop_list))]
+
+         df_invalid_ports["port_names"] = df_invalid_ports["port_names"].apply(lambda x: x.strip())
          data_frame = data_frame.merge(df_invalid_ports, how="left", on=port_code)
 
          data_frame.dropna(subset=["port_names"], inplace=True)
