@@ -2,6 +2,7 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 import pandas as pd
+import numpy as np
 
 class USDemographicsOperator(BaseOperator):
 
@@ -12,7 +13,7 @@ class USDemographicsOperator(BaseOperator):
                  table_name ="",
                  data_storage_method="local",
                  data_storage = "",
-                 separator = "",
+                 separator = ";",
                  *args, **kwargs):
         super(USDemographicsOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
@@ -25,7 +26,12 @@ class USDemographicsOperator(BaseOperator):
     @staticmethod
     def __clean_demographics(data_frame):
         data_frame["City"] = data_frame["City"].str.replace("'","''")
-        return data_frame
+        data_frame = data_frame.replace({pd.np.nan: 0.0})
+
+        del data_frame["Race"]
+        del data_frame["Count"]
+        data_frame.reset_index(inplace=True)
+        return data_frame.drop_duplicates()
 
     def execute(self, context):
 
@@ -37,8 +43,6 @@ class USDemographicsOperator(BaseOperator):
                                                     {},
                                                     {},
                                                     {},
-                                                    '{}',
-                                                    '{}',
                                                     '{}');
         """
         # Import data from local or S3
@@ -51,18 +55,20 @@ class USDemographicsOperator(BaseOperator):
 
         self.log.info("Inserting data into US Demographics table")
 
-        for index, row in us_demo_clean.iterrows():
-            sql_cmd = table_insert.format(self.table_name,
-                                          index,
-                                        row["City"],
-                                        row["State"],
-                                        row["Median Age"],
-                                        row["Male Population"],
-                                        row["Female Population"],
-                                        row["Total Population"],
-                                        row["Foreign-born"],
-                                        row["Average Household Size"],
-                                        row["State Code"],
-                                        row["Race"],
-                                        row["Count"])
-            redshift.run(sql_cmd)
+        values_insert = """ ({}, '{}',
+                                 '{}',
+                                '{}',
+                                {},
+                                {},
+                                {},
+                                {},
+                                {},
+                                '{}'),"""
+        batch_size = 5
+        columns = ["index", "City", "State", "Median Age", "Male Population","Female Population",
+                   "Total Population", "Foreign-born",
+                   "Average Household Size",
+                   "State Code"]
+
+        self.data_storage.upload_data_redshift(redshift, us_demo_clean, batch_size, self.table_name, columns,
+                                               values_insert)

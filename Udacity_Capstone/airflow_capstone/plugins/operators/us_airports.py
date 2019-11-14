@@ -30,21 +30,17 @@ class USAirportsOperator(BaseOperator):
         us_airports.loc[:, "LATITUDE"] = us_airports["coordinates"].apply(lambda x: x.split(",")[1])
         us_airports.loc[:, "LONGITUDE"] = us_airports["coordinates"].apply(lambda x: x.split(",")[0])
 
+        #fix names
+        us_airports["name"] = us_airports["name"].str.replace("'", "''")
+        us_airports["municipality"] = us_airports["municipality"].str.replace("'", "''")
+
+        us_airports.reset_index(inplace=True)
         return us_airports
 
 
 
     def execute(self, context):
 
-        table_insert = """ INSERT INTO {} VALUES ({}, '{}',
-                                                    '{}',
-                                                    '{}',
-                                                    '{}',
-                                                    '{}',
-                                                    '{}',
-                                                    {},
-                                                    {});
-        """
         # Import data from local or S3
         us_airports = self.data_storage.import_data_csv(self.data_storage_method, self.data_location, self.separator)
 
@@ -56,15 +52,17 @@ class USAirportsOperator(BaseOperator):
 
         self.log.info("Inserting data into US Demographics table")
 
-        for index,row in clean_data.iterrows():
-            sql_cmd = table_insert.format(self.table_name,index,
-                                    row["ident"],
-                                    row["name"],
-                                    row["elevation_ft"],
-                                    row["iso_region"],
-                                    row["municipality"],
-                                row["coordinates"],
-                                row["LATITUDE"],
-                                row["LONGITUDE"],
-                                )
-            redshift.run(sql_cmd)
+
+        values_insert = """ ({}, '{}',
+                                                    '{}',
+                                                    '{}',
+                                                    '{}',
+                                                    '{}',
+                                                    '{}',
+                                                    {},
+                                                    {}),"""
+        batch_size = 5
+        columns = ["index","ident","name","elevation_ft","iso_region","municipality","coordinates","LATITUDE","LONGITUDE"]
+
+
+        self.data_storage.upload_data_redshift(redshift,clean_data,batch_size,self.table_name, columns,values_insert)

@@ -19,8 +19,15 @@ class SqlQueries:
 
     us_immigration_table = """
 CREATE TABLE IF NOT EXISTS immigration (
-	ID SERIAL NOT NULL,
-	
+	ID INTEGER IDENTITY(1,1) PRIMARY KEY SORTKEY,
+	i94port VARCHAR,
+	biryear INT,
+	i94cit VARCHAR,
+	depdate VARCHAR,
+	i94visa VARCHAR,
+	i94mon INT,
+	i94yr INT,
+	port_names VARCHAR
 );
     
     """
@@ -36,9 +43,7 @@ CREATE TABLE IF NOT EXISTS demographics (
     total_population	FLOAT,
     foreign_born	FLOAT ,
     average_household_size	FLOAT ,
-    state_code	VARCHAR NOT NULL,
-    race	VARCHAR,
-    count VARCHAR NOT NULL);
+    state_code	VARCHAR NOT NULL);
     """
 
     us_airports = """
@@ -53,4 +58,5 @@ CREATE TABLE  IF NOT EXISTS airports (
 	LATITUDE	DOUBLE PRECISION NOT NULL,
 	LONGITUDE  DOUBLE PRECISION NOT NULL);
     """
+
 
