@@ -1,6 +1,6 @@
 # Summary
 The goal of this data pipeline was to set a data-warehouse for data around US cities. With a particular around
-city population and the yearly immigration reports released. This warehouse is to maintain as a source of truth for further
+city population and the monthly immigration reports released. This warehouse is to maintain as a source of truth for further
 study by data analysts. 
 
 Airflow is used to load the data into Redshift and run the algorithm for analysis. Airflow was selected

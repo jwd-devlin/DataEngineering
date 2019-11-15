@@ -47,9 +47,12 @@ create_tables_in_redshift = CreateTablesOperator(task_id= 'Create_tables',
                                                                     SqlQueries.us_city_table,
                                                                     SqlQueries.us_city_demographics,
                                                                     SqlQueries.us_airports,
-                                                                    SqlQueries.us_immigration_table],
+                                                                    SqlQueries.us_immigration
+
+                                                                    ],
                                                  reset_collection=True,
                                                  )
+
 load_city_tables = USCityCoordinatesOperator(
         task_id='load_city_stat_info',
         dag=dag,
@@ -78,6 +81,7 @@ load_airports = USAirportsOperator(
         separator = ","
 )
 
+
 load_immigration = USImmigrationOperator(
         task_id='load_immigration_info',
         dag=dag,
@@ -86,10 +90,8 @@ load_immigration = USImmigrationOperator(
         data_storage_method = "local",
         table_name = "immigration",
         data_storage = DataStorage(),
-        additional_data = ImmigrationConvert()
+    additional_data=ImmigrationConvert(),
+    month=default_args["start_date"].strftime("%b").lower()
 )
 
-
-
-start_operator >> create_tables_in_redshift >> load_city_tables >> load_demographics >> load_airports >> load_immigration
-#start_operator >> create_tables_in_redshift >> load_immigration
+start_operator >> create_tables_in_redshift >> load_city_tables >> load_demographics >> load_airports

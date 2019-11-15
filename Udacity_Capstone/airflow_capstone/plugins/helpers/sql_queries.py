@@ -10,7 +10,7 @@ class SqlQueries:
     us_city_table = """
     CREATE TABLE IF NOT EXISTS cities (
 	    ID INTEGER PRIMARY KEY SORTKEY,
-	    ID_STATE INTEGER NOT NULL,
+	    ID_STATE INTEGER NOT NULL FOREIGN KEY,
 	    city VARCHAR NOT NULL,
 	    county VARCHAR NOT NULL,
 	    LATITUDE DOUBLE PRECISION NOT NULL,
@@ -26,8 +26,7 @@ CREATE TABLE IF NOT EXISTS immigration (
 	depdate VARCHAR,
 	i94visa VARCHAR,
 	i94mon INT,
-	i94yr INT,
-	port_names VARCHAR
+	i94yr INT
 );
     
     """

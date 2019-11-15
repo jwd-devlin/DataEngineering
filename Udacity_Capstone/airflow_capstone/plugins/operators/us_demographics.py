@@ -30,8 +30,9 @@ class USDemographicsOperator(BaseOperator):
 
         del data_frame["Race"]
         del data_frame["Count"]
+        data_frame.drop_duplicates(inplace=True)
         data_frame.reset_index(inplace=True)
-        return data_frame.drop_duplicates()
+        return data_frame
 
     def execute(self, context):
 
