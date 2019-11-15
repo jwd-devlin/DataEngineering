@@ -65,8 +65,8 @@ class USImmigrationOperator(BaseOperator):
         # Redshift hook: for data storage.
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
-        year = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"]
-
+        #year = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"]
+        year = ["jan","feb","mar"]
         for month in year:
             file_location = self.data_location + "i94_{}16_sub.sas7bdat".format(month)
 
@@ -76,9 +76,12 @@ class USImmigrationOperator(BaseOperator):
                 df_clean = self.__clean_immigration(df_month_chunk)
                 print(month, df_clean.shape)
                 values_insert = """ ('{}', {}, '{}', '{}', '{}', {}, {}, '{}'),"""
-                batch_size = 5
+                batch_size = 3
                 columns = ["i94port", "biryear", "i94cit", "depdate", "i94visa", "i94mon", "i94yr",
                            "port_names"]
                 table_name_plus = self.table_name +"("+",".join(columns)+")"
-                self.data_storage.upload_data_redshift(redshift, df_clean, batch_size, table_name_plus, columns,
+                if df_clean.empty:
+                    continue
+                else:
+                    self.data_storage.upload_data_redshift(redshift, df_clean, batch_size, table_name_plus, columns,
                                                        values_insert)

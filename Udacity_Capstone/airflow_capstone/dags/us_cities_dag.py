@@ -50,7 +50,7 @@ create_tables_in_redshift = CreateTablesOperator(task_id= 'Create_tables',
                                                                     SqlQueries.us_immigration_table],
                                                  reset_collection=True,
                                                  )
-"""load_city_tables = USCityCoordinatesOperator(
+load_city_tables = USCityCoordinatesOperator(
         task_id='load_city_stat_info',
         dag=dag,
         redshift_conn_id="redshift"
@@ -77,7 +77,7 @@ load_airports = USAirportsOperator(
         data_storage = DataStorage(),
         separator = ","
 )
-"""
+
 load_immigration = USImmigrationOperator(
         task_id='load_immigration_info',
         dag=dag,
@@ -91,5 +91,5 @@ load_immigration = USImmigrationOperator(
 
 
 
-#start_operator >> create_tables_in_redshift >> load_city_tables >> load_demographics >> load_airports >> load_immigration
-start_operator >> create_tables_in_redshift >> load_immigration
+start_operator >> create_tables_in_redshift >> load_city_tables >> load_demographics >> load_airports >> load_immigration
+#start_operator >> create_tables_in_redshift >> load_immigration
